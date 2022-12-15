@@ -1,3 +1,8 @@
-https://www.youtube.com/watch?v=ZQL7tL2S0oQ
+GraphQL demo project.
+
+1. npm install
+2. npm run start:dev
 
 
+
+http://localhost:5000/graphql
