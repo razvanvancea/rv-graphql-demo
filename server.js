@@ -11,9 +11,9 @@ const {
 const app = express()
 
 const authors = [
-	{ id: 1, name: 'J. K. Rowling' },
-	{ id: 2, name: 'J. R. R. Tolkien' },
-	{ id: 3, name: 'Brent Weeks' }
+	{ id: 1, name: 'A. L. Smith', email: 'alsmith@gmail.com' },
+	{ id: 2, name: 'J. R. R. Tolbach',email: 'tolbach@gmail.com' },
+	{ id: 3, name: 'John Wick', email: 'jwick@gmail.com' }
 ]
 
 const books = [
@@ -49,6 +49,7 @@ const AuthorType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLNonNull(GraphQLInt) },
     name: { type: GraphQLNonNull(GraphQLString) },
+    email: { type: GraphQLNonNull(GraphQLString) },
     books: {
       type: new GraphQLList(BookType),
       resolve: (author) => {
@@ -108,14 +109,26 @@ const RootMutationType = new GraphQLObjectType({
         return book
       }
     },
+    deleteBook: {
+            type:BookType,
+            description: "Delete a book",
+            args:{
+                id:{type: new GraphQLNonNull(GraphQLString)}
+            },
+            resolve(parentValue, args){
+                return axios.delete('http://localhost:3000/customers/'+args.id)
+                .then(res => res.data);
+            }
+        },
     addAuthor: {
       type: AuthorType,
       description: 'Add an author',
       args: {
-        name: { type: GraphQLNonNull(GraphQLString) }
+        name: { type: GraphQLNonNull(GraphQLString) },
+        email: { type: GraphQLNonNull(GraphQLString) }
       },
       resolve: (parent, args) => {
-        const author = { id: authors.length + 1, name: args.name }
+        const author = { id: authors.length + 1, name: args.name, email: args.email }
         authors.push(author)
         return author
       }
@@ -128,8 +141,11 @@ const schema = new GraphQLSchema({
   mutation: RootMutationType
 })
 
-app.use('/graphql', expressGraphQL({
+const PORT = 5000;
+const PATH = '/graphql';
+
+app.use(PATH, expressGraphQL({
   schema: schema,
   graphiql: true
 }))
-app.listen(5000, () => console.log('Server Running'))
+app.listen(PORT, () => console.log('Server running on http://localhost:'+PORT+PATH));
